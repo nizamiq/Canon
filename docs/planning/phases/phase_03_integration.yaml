@@ -1,0 +1,77 @@
+id: phase_03_integration
+title: "Phase 03: Ecosystem Integration"
+description: "Integrate Canon with all consumer services in the NizamIQ ecosystem."
+status: PENDING
+dependencies:
+  - phase_02_sdk
+
+tasks:
+  - id: T03.1
+    title: "Migrate Atlas prompts"
+    description: "Migrate Atlas analytics agent prompts from JSON reference packs to Canon."
+    verification: "Atlas retrieves prompts from Canon via SDK."
+    status: PENDING
+
+  - id: T03.2
+    title: "Migrate Recce prompts"
+    description: "Migrate Recce research agent prompts to Canon."
+    verification: "Recce retrieves prompts from Canon via SDK."
+    status: PENDING
+
+  - id: T03.3
+    title: "Migrate CI/CD CodeX prompts"
+    description: "Migrate the review.md prompt from all repositories to Canon."
+    verification: "CI/CD pipeline retrieves CodeX prompt from Canon."
+    status: PENDING
+
+  - id: T03.4
+    title: "Migrate Fireside prompts"
+    description: "Migrate prompts from agents.yaml configuration to Canon."
+    verification: "Fireside retrieves prompts from Canon via SDK."
+    status: PENDING
+
+  - id: T03.5
+    title: "Migrate anchorlink prompts"
+    description: "Migrate hardcoded Python strings in anchorlink to Canon."
+    verification: "anchorlink retrieves prompts from Canon via SDK."
+    status: PENDING
+
+  - id: T03.6
+    title: "Migrate meridian prompts"
+    description: "Migrate workflow automation prompts to Canon."
+    verification: "meridian retrieves prompts from Canon via SDK."
+    status: PENDING
+
+  - id: T03.7
+    title: "Remove deprecated prompt storage"
+    description: "Clean up old prompt files and configurations from all services."
+    verification: "No duplicate prompt files remain in consumer repos."
+    status: PENDING
+
+  - id: T03.8
+    title: "Create governance workflow"
+    description: "Establish prompt approval workflow with Aegis RBAC enforcement."
+    verification: "Prompt changes require approval before production deployment."
+    status: PENDING
+
+  - id: T03.9
+    title: "Deploy to production"
+    description: "Deploy Canon service to production via Plinth."
+    verification: "Canon running in production with all consumers connected."
+    status: PENDING
+
+  - id: T03.10
+    title: "Create operational runbook"
+    description: "Document operational procedures, monitoring, and incident response."
+    verification: "Runbook covers all operational scenarios."
+    status: PENDING
+
+completion_criteria:
+  - criterion: "All consumer services integrated with Canon."
+    status: PENDING
+  - criterion: "No duplicate prompt storage in ecosystem."
+    status: PENDING
+  - criterion: "Governance workflow operational."
+    status: PENDING
+  - criterion: "Canon deployed to production."
+    status: PENDING

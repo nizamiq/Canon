@@ -1,0 +1,89 @@
+id: phase_01_core_service
+title: "Phase 01: Core Service Implementation"
+description: "Build the core Canon FastAPI service with database models, migrations, and RESTful API endpoints."
+status: PENDING
+dependencies:
+  - phase_00_init
+
+tasks:
+  - id: T01.1
+    title: "Create FastAPI application skeleton"
+    description: "Initialize the FastAPI app with proper middleware, CORS, and health check endpoints."
+    verification: "FastAPI app starts and responds to /health endpoint."
+    status: PENDING
+
+  - id: T01.2
+    title: "Create SQLAlchemy async models"
+    description: "Create the database models: canon_prompts, canon_prompt_versions, canon_version_tags, canon_audit_log."
+    verification: "Models defined with proper relationships and async support."
+    status: PENDING
+
+  - id: T01.3
+    title: "Create Alembic migrations"
+    description: "Initialize Alembic and create initial migration for all database tables."
+    verification: "alembic upgrade head creates all tables in PostgreSQL."
+    status: PENDING
+
+  - id: T01.4
+    title: "Implement JWT authentication middleware"
+    description: "Add Zitadel JWT validation middleware for all API endpoints."
+    verification: "Unauthenticated requests return 401, valid JWTs are accepted."
+    status: PENDING
+
+  - id: T01.5
+    title: "Implement prompt CRUD endpoints"
+    description: "Create RESTful endpoints: GET /v1/prompts, POST /v1/prompts, GET /v1/prompts/{name}."
+    verification: "All endpoints work with proper request/response schemas."
+    status: PENDING
+
+  - id: T01.6
+    title: "Implement versioning logic"
+    description: "Add version creation and immutable storage logic for prompts."
+    verification: "Creating a prompt version stores immutable content snapshot."
+    status: PENDING
+
+  - id: T01.7
+    title: "Implement tagging system"
+    description: "Add mutable tag management (production, staging, etc.) for prompt versions."
+    verification: "Tags can be created, moved, and listed."
+    status: PENDING
+
+  - id: T01.8
+    title: "Implement audit logging"
+    description: "Add comprehensive audit logging for all governance-relevant actions."
+    verification: "All create, update, and approval actions are logged."
+    status: PENDING
+
+  - id: T01.9
+    title: "Add Aegis SDK integration"
+    description: "Integrate Aegis SDK for RBAC enforcement on prompt operations."
+    verification: "RBAC permissions checked for create, edit, approve actions."
+    status: PENDING
+
+  - id: T01.10
+    title: "Create OpenAPI specification"
+    description: "Ensure complete OpenAPI 3.1 spec is generated and documented."
+    verification: "/docs endpoint shows complete API documentation."
+    status: PENDING
+
+  - id: T01.11
+    title: "Write unit tests"
+    description: "Create comprehensive unit tests for all service components."
+    verification: "pytest passes with >80% coverage."
+    status: PENDING
+
+  - id: T01.12
+    title: "Create Docker configuration"
+    description: "Create Dockerfile and docker-compose for local development."
+    verification: "docker-compose up runs the full service stack."
+    status: PENDING
+
+completion_criteria:
+  - criterion: "FastAPI service runs and responds to health checks."
+    status: PENDING
+  - criterion: "All database tables created via Alembic migrations."
+    status: PENDING
+  - criterion: "All API endpoints functional with JWT auth."
+    status: PENDING
+  - criterion: "Unit tests pass with >80% coverage."
+    status: PENDING

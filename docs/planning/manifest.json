@@ -1,0 +1,37 @@
+{
+  "project_name": "Canon",
+  "version": "1.0.0",
+  "total_phases": 4,
+  "completed_phases": ["00"],
+  "current_phase": "01",
+  "phase_map": {
+    "00": "./docs/planning/phases/phase_00_init.yaml",
+    "01": "./docs/planning/phases/phase_01_core_service.yaml",
+    "02": "./docs/planning/phases/phase_02_sdk.yaml",
+    "03": "./docs/planning/phases/phase_03_integration.yaml"
+  },
+  "ecosystem_context": {
+    "master_strategy_repo": "nizamiq-strategy",
+    "adr": "docs/architecture/ADR_004_Prompt_Registry.md",
+    "status": "incubating",
+    "note": "Canon is the centralized AI agent prompt registry per ADR-004",
+    "last_strategy_sync": "2026-02-23"
+  },
+  "status": "READY",
+  "last_updated": "2026-02-23",
+  "last_updated_by": "Orchestrator Agent",
+  "phase_00_completion": {
+    "tasks_completed": 7,
+    "tasks_total": 7,
+    "completed_at": "2026-02-23",
+    "deliverables": [
+      "Directory structure per UDS",
+      "manifest.json with phase map",
+      "CONTEXT.md with AI entry point",
+      "README.md with project overview",
+      "AGENTS.md with scope check",
+      "Phase 01-03 YAML definitions",
+      "Core Python source structure with FastAPI scaffolding"
+    ]
+  }
+}
