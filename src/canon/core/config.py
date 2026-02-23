@@ -12,6 +12,12 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    model_config = {
+        "env_prefix": "CANON_",
+        "env_file": ".env",
+        "case_sensitive": False
+    }
+
     # Application
     app_name: str = "Canon"
     app_version: str = "1.0.0"
@@ -34,11 +40,6 @@ class Settings(BaseSettings):
 
     # Redis (optional caching)
     redis_url: str | None = None
-
-    class Config:
-        env_prefix = "CANON_"
-        env_file = ".env"
-        case_sensitive = False
 
 
 @lru_cache

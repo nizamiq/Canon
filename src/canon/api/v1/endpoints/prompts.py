@@ -4,7 +4,7 @@ Prompt Management Endpoints
 Provides CRUD operations for prompts in the Canon registry.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -111,7 +111,7 @@ async def create_prompt(prompt: PromptCreate) -> PromptResponse:
             status_code=409, detail="Prompt with this name already exists"
         )
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     prompt_data = {
         "id": prompt.name,  # Using name as ID for simplicity
