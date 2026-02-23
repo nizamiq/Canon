@@ -107,7 +107,9 @@ async def create_prompt(prompt: PromptCreate) -> PromptResponse:
         HTTPException: If prompt with name already exists.
     """
     if prompt.name in _PROMPTS_STORE:
-        raise HTTPException(status_code=409, detail="Prompt with this name already exists")
+        raise HTTPException(
+            status_code=409, detail="Prompt with this name already exists"
+        )
 
     now = datetime.utcnow()
 

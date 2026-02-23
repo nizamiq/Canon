@@ -50,10 +50,14 @@ class PromptVersion(Base):
     __tablename__ = "canon_prompt_versions"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
-    prompt_id: Mapped[str] = mapped_column(Text, ForeignKey("canon_prompts.id"), nullable=False)
+    prompt_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("canon_prompts.id"), nullable=False
+    )
     version: Mapped[int] = mapped_column(nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, nullable=False
+    )
     created_by: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Relationships
@@ -74,10 +78,16 @@ class VersionTag(Base):
     __tablename__ = "canon_version_tags"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
-    prompt_id: Mapped[str] = mapped_column(Text, ForeignKey("canon_prompts.id"), nullable=False)
+    prompt_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("canon_prompts.id"), nullable=False
+    )
     tag_name: Mapped[str] = mapped_column(Text, nullable=False)
-    version_id: Mapped[str] = mapped_column(Text, ForeignKey("canon_prompt_versions.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
+    version_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("canon_prompt_versions.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, nullable=False
+    )
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
@@ -100,12 +110,18 @@ class AuditLog(Base):
     __tablename__ = "canon_audit_log"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
-    action: Mapped[str] = mapped_column(Text, nullable=False)  # CREATE, UPDATE, APPROVE, etc.
-    resource_type: Mapped[str] = mapped_column(Text, nullable=False)  # PROMPT, VERSION, TAG
+    action: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )  # CREATE, UPDATE, APPROVE, etc.
+    resource_type: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )  # PROMPT, VERSION, TAG
     resource_id: Mapped[str] = mapped_column(Text, nullable=False)
     actor: Mapped[str] = mapped_column(Text, nullable=False)
     details: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON details
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, nullable=False
+    )
 
     def __repr__(self) -> str:
         return f"<AuditLog(action={self.action}, resource={self.resource_type}:{self.resource_id})>"
