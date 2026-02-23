@@ -1,0 +1,58 @@
+# Canon docker-compose.yml
+# Local development environment
+
+services:
+  canon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - CANON_DATABASE_URL=postgresql+asyncpg://canon:canon@postgres:5432/canon
+      - CANON_DEBUG=true
+      - CANON_ENVIRONMENT=development
+      - CANON_ZITADEL_ISSUER_URL=${ZITADEL_ISSUER_URL:-}
+      - CANON_AEGIS_URL=${AEGIS_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=canon
+      - POSTGRES_PASSWORD=canon
+      - POSTGRES_DB=canon
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canon -d canon"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    profiles:
+      - cache
+
+volumes:
+  postgres_data:
+  redis_data:

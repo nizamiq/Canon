@@ -1,7 +1,7 @@
 id: phase_01_core_service
 title: "Phase 01: Core Service Implementation"
 description: "Build the core Canon FastAPI service with database models, migrations, and RESTful API endpoints."
-status: PENDING
+status: IN_PROGRESS
 dependencies:
   - phase_00_init
 
@@ -10,19 +10,23 @@ tasks:
     title: "Create FastAPI application skeleton"
     description: "Initialize the FastAPI app with proper middleware, CORS, and health check endpoints."
     verification: "FastAPI app starts and responds to /health endpoint."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-23"
+    proof_of_work: "src/canon/main.py with lifespan, CORS middleware, router includes"
 
   - id: T01.2
     title: "Create SQLAlchemy async models"
     description: "Create the database models: canon_prompts, canon_prompt_versions, canon_version_tags, canon_audit_log."
     verification: "Models defined with proper relationships and async support."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-23"
+    proof_of_work: "src/canon/models/prompt.py with Prompt, PromptVersion, VersionTag, AuditLog models"
 
   - id: T01.3
     title: "Create Alembic migrations"
     description: "Initialize Alembic and create initial migration for all database tables."
     verification: "alembic upgrade head creates all tables in PostgreSQL."
-    status: PENDING
+    status: IN_PROGRESS
 
   - id: T01.4
     title: "Implement JWT authentication middleware"
@@ -34,7 +38,9 @@ tasks:
     title: "Implement prompt CRUD endpoints"
     description: "Create RESTful endpoints: GET /v1/prompts, POST /v1/prompts, GET /v1/prompts/{name}."
     verification: "All endpoints work with proper request/response schemas."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-23"
+    proof_of_work: "src/canon/api/v1/endpoints/prompts.py with list, create, get, get_version"
 
   - id: T01.6
     title: "Implement versioning logic"
@@ -64,7 +70,9 @@ tasks:
     title: "Create OpenAPI specification"
     description: "Ensure complete OpenAPI 3.1 spec is generated and documented."
     verification: "/docs endpoint shows complete API documentation."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-23"
+    proof_of_work: "FastAPI auto-generates OpenAPI at /docs and /openapi.json"
 
   - id: T01.11
     title: "Write unit tests"
@@ -76,11 +84,13 @@ tasks:
     title: "Create Docker configuration"
     description: "Create Dockerfile and docker-compose for local development."
     verification: "docker-compose up runs the full service stack."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-23"
+    proof_of_work: "Dockerfile (multi-stage), docker-compose.yml (canon, postgres, redis)"
 
 completion_criteria:
   - criterion: "FastAPI service runs and responds to health checks."
-    status: PENDING
+    status: COMPLETE
   - criterion: "All database tables created via Alembic migrations."
     status: PENDING
   - criterion: "All API endpoints functional with JWT auth."
