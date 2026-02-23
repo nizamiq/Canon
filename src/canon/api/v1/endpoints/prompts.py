@@ -5,7 +5,6 @@ Provides CRUD operations for prompts in the Canon registry.
 """
 
 from datetime import datetime
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -17,14 +16,14 @@ class PromptBase(BaseModel):
     """Base model for prompt data."""
 
     name: str = Field(..., description="Unique prompt identifier")
-    description: Optional[str] = Field(None, description="Prompt description")
+    description: str | None = Field(None, description="Prompt description")
 
 
 class PromptCreate(PromptBase):
     """Model for creating a new prompt."""
 
     content: str = Field(..., description="Prompt content/text")
-    tags: Optional[List[str]] = Field(default_factory=list, description="Initial tags")
+    tags: list[str] = Field(default_factory=list, description="Initial tags")
 
 
 class PromptVersion(BaseModel):
@@ -41,16 +40,16 @@ class PromptResponse(PromptBase):
 
     id: str
     current_version: int
-    tags: List[str]
+    tags: list[str]
     created_at: datetime
     updated_at: datetime
-    versions: List[PromptVersion] = Field(default_factory=list)
+    versions: list[PromptVersion] = Field(default_factory=list)
 
 
 class PromptListResponse(BaseModel):
     """Model for paginated prompt list response."""
 
-    prompts: List[PromptResponse]
+    prompts: list[PromptResponse]
     total: int
     page: int
     page_size: int
@@ -64,7 +63,7 @@ _PROMPTS_STORE: dict = {}
 async def list_prompts(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    tag: Optional[str] = Query(None, description="Filter by tag"),
+    tag: str | None = Query(None, description="Filter by tag"),
 ) -> PromptListResponse:
     """
     List all prompts with optional filtering.

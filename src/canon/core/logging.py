@@ -6,12 +6,11 @@ Provides structured logging for the Canon service.
 
 import logging
 import sys
-from typing import Optional
 
 from canon.core.config import settings
 
 
-def get_logger(name: Optional[str] = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger:
     """
     Get a configured logger instance.
 

@@ -4,6 +4,6 @@ Canon Models Module
 Contains SQLAlchemy ORM models for the Canon database.
 """
 
-from canon.models.prompt import Prompt, PromptVersion, VersionTag, AuditLog
+from canon.models.prompt import AuditLog, Prompt, PromptVersion, VersionTag
 
 __all__ = ["Prompt", "PromptVersion", "VersionTag", "AuditLog"]
