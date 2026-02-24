@@ -6,6 +6,7 @@ Provides async database session management using SQLAlchemy.
 
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -54,7 +55,7 @@ async def init_db() -> None:
     """Initialize database connection pool."""
     # Test connection
     async with engine.begin() as conn:
-        await conn.execute("SELECT 1")
+        await conn.execute(text("SELECT 1"))
 
 
 async def close_db() -> None:
