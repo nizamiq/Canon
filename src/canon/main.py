@@ -12,6 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from canon import __version__
 from canon.api.v1 import api_router
 from canon.core.config import settings
+from canon.core.database import init_db, close_db
+from canon.core.aegis import close_aegis_client
 from canon.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -21,11 +23,22 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan context manager for startup/shutdown events."""
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    # TODO: Initialize database connection pool
-    # TODO: Initialize Aegis client
+    
+    # Initialize database connection pool
+    try:
+        await init_db()
+        logger.info("Database connection pool initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        raise
+    
     yield
+    
+    # Cleanup
     logger.info(f"Shutting down {settings.app_name}")
-    # TODO: Close database connection pool
+    await close_db()
+    await close_aegis_client()
+    logger.info("Cleanup complete")
 
 
 def create_app() -> FastAPI:
@@ -36,15 +49,22 @@ def create_app() -> FastAPI:
         version=__version__,
         docs_url="/docs",
         redoc_url="/redoc",
+        openapi_url="/openapi.json",
         lifespan=lifespan,
     )
 
-    # Configure CORS
+    # Configure CORS based on environment
+    allowed_origins = ["*"] if settings.environment == "development" else [
+        "https://nizamiq.com",
+        "https://*.nizamiq.com",
+        "https://portal.nizamiq.com",
+    ]
+    
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # TODO: Configure based on environment
+        allow_origins=allowed_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
