@@ -202,7 +202,7 @@ async def create_prompt(
         )
         return PromptResponse.from_model(created)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.get("/{name}", response_model=PromptResponse)
@@ -258,7 +258,7 @@ async def create_version(
         )
         return PromptVersionResponse.from_model(created)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.get("/{name}/versions/{version}", response_model=PromptVersionResponse)
@@ -312,7 +312,7 @@ async def list_tags(
             tags=[TagResponse.from_model(t) for t in tags]
         )
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.put("/{name}/tags/{tag_name}", response_model=TagResponse)
@@ -346,7 +346,7 @@ async def update_tag(
         )
         return TagResponse.from_model(tag)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.delete("/{name}/tags/{tag_name}", status_code=status.HTTP_204_NO_CONTENT)
