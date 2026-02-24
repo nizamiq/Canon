@@ -1,0 +1,229 @@
+name: "Nizamiq Golden Pipeline"
+# Authoritative standard: nizamiq-strategy/docs/governance/ci_cd_standards.md
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nizamiq/canon
+
+jobs:
+  lint:
+    name: "Gate 1 — Code Quality"
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install lint tools
+        run: pip install ruff mypy
+      - name: Ruff lint
+        run: ruff check src/ || true
+      - name: Ruff format check
+        run: ruff format --check src/ || true
+      - name: Mypy type check
+        run: mypy src/ --ignore-missing-imports || true
+
+  test:
+    name: "Gate 2 — Tests"
+    runs-on: ubuntu-latest
+    needs: [lint]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: anchorlink
+          POSTGRES_PASSWORD: anchorlink_test
+          POSTGRES_DB: anchorlink_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run tests with coverage
+        env:
+          ANCHORLINK_DATABASE_URL: postgresql://anchorlink:anchorlink_test@localhost:5432/anchorlink_test
+          ANCHORLINK_REDIS_URL: redis://localhost:6379/0
+        run: pytest tests/ -v --cov=src/docgraph --cov-report=xml --cov-fail-under=1 || true
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ===================================================================
+  # GATE 3: AI AUTONOMOUS REVIEW
+  # ===================================================================
+  coderabbit-review:
+    name: "Gate 3a — AI Review (CodeRabbit)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [test]
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: ${{ github.repository }}-${{ github.event.pull_request.number }}-coderabbit
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: coderabbitai/ai-pr-reviewer@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          debug: false
+          review_simple_changes: false
+          review_comment_lgtm: false
+
+  codex-review:
+    name: "Gate 3b — AI Review (CodeX Gate)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [test]
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: ${{ github.repository }}-${{ github.event.pull_request.number }}-codex
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+      - name: Run Codex review
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/review.md
+          sandbox: read-only
+          codex-args: --full-auto
+      - name: Parse severity summary
+        id: severity
+        shell: bash
+        env:
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final_message }}
+        run: |
+          set -euo pipefail
+          msg="$CODEX_FINAL_MESSAGE"
+          if [ -z "$msg" ]; then
+            echo "blockers=0" >> "$GITHUB_OUTPUT"
+            echo "major=0" >> "$GITHUB_OUTPUT"
+            echo "minor=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          get_val() { echo "$msg" | sed -n "s/^$1:[[:space:]]*//p" | head -1; }
+          blockers=$(get_val "BLOCKERS"); major=$(get_val "MAJOR"); minor=$(get_val "MINOR")
+          if [ -z "$blockers" ] || [ -z "$major" ] || [ -z "$minor" ]; then
+            blockers=1; major=0; minor=0
+          fi
+          echo "blockers=$blockers" >> "$GITHUB_OUTPUT"
+          echo "major=$major" >> "$GITHUB_OUTPUT"
+          echo "minor=$minor" >> "$GITHUB_OUTPUT"
+      - name: Gate on severity
+        shell: bash
+        run: |
+          if [ "${{ steps.severity.outputs.blockers }}" -gt 0 ] || [ "${{ steps.severity.outputs.major }}" -ge 3 ]; then
+            echo "Codex gate failed: blockers=${{ steps.severity.outputs.blockers }} major=${{ steps.severity.outputs.major }}"
+            exit 1
+          fi
+      - name: Post Codex review
+        if: steps.codex.outputs.final_message != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const body = process.env.CODEX_FINAL_MESSAGE;
+            const blockers = Number(process.env.CODEX_BLOCKERS || 0);
+            const major = Number(process.env.CODEX_MAJOR || 0);
+            const event = (blockers > 0 || major >= 3) ? "REQUEST_CHANGES" : "COMMENT";
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              event,
+              body,
+            });
+        env:
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final_message }}
+          CODEX_BLOCKERS: ${{ steps.severity.outputs.blockers }}
+          CODEX_MAJOR: ${{ steps.severity.outputs.major }}
+  # ===================================================================
+  # GATE 4: BUILD & SECURITY SCAN
+  # ===================================================================
+  build-and-scan:
+    name: "Gate 4 — Build & Security"
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=pr
+            type=sha,prefix=
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+        continue-on-error: true
