@@ -4,8 +4,9 @@ Canon Aegis Integration
 Provides Aegis SDK integration for RBAC enforcement.
 """
 
-import httpx
 from typing import Any
+
+import httpx
 
 from canon.core.config import settings
 from canon.core.logging import get_logger
@@ -16,15 +17,15 @@ logger = get_logger(__name__)
 class AegisClient:
     """
     Client for interacting with the Aegis governance service.
-    
+
     Aegis provides centralized RBAC enforcement for all NizamIQ services.
     """
-    
+
     # Canon resource types for Aegis
     RESOURCE_PROMPT = "canon:prompt"
     RESOURCE_VERSION = "canon:version"
     RESOURCE_TAG = "canon:tag"
-    
+
     # Canon actions for Aegis
     ACTION_CREATE = "create"
     ACTION_READ = "read"
@@ -32,11 +33,11 @@ class AegisClient:
     ACTION_DELETE = "delete"
     ACTION_APPROVE = "approve"
     ACTION_PUBLISH = "publish"
-    
+
     def __init__(self, base_url: str | None = None, timeout: int = 30):
         """
         Initialize Aegis client.
-        
+
         Args:
             base_url: Aegis service URL. Falls back to settings.
             timeout: Request timeout in seconds.
@@ -44,19 +45,19 @@ class AegisClient:
         self.base_url = base_url or settings.aegis_url
         self.timeout = timeout
         self._client: httpx.AsyncClient | None = None
-    
+
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""
         if self._client is None:
             self._client = httpx.AsyncClient(timeout=self.timeout)
         return self._client
-    
+
     async def close(self) -> None:
         """Close HTTP client."""
         if self._client:
             await self._client.aclose()
             self._client = None
-    
+
     async def check_permission(
         self,
         user_id: str,
@@ -67,24 +68,24 @@ class AegisClient:
     ) -> bool:
         """
         Check if a user has permission to perform an action.
-        
+
         Args:
             user_id: User identifier.
             resource: Resource type (e.g., "canon:prompt").
             action: Action to perform (e.g., "create").
             resource_id: Optional specific resource ID.
             context: Optional additional context.
-            
+
         Returns:
             bool: True if permitted, False otherwise.
         """
         if not self.base_url:
             logger.warning("Aegis URL not configured - allowing all operations")
             return True
-        
+
         try:
             client = await self._get_client()
-            
+
             payload = {
                 "user_id": user_id,
                 "resource": resource,
@@ -92,26 +93,26 @@ class AegisClient:
                 "resource_id": resource_id,
                 "context": context or {},
             }
-            
+
             response = await client.post(
                 f"{self.base_url}/api/v1/permissions/check",
                 json=payload,
             )
-            
+
             if response.status_code == 200:
                 result = response.json()
                 return result.get("allowed", False)
-            
+
             logger.warning(
                 f"Aegis permission check failed: {response.status_code}"
             )
             return False
-            
+
         except Exception as e:
             logger.error(f"Aegis client error: {e}")
             # Fail closed in production, fail open in development
             return settings.environment == "development"
-    
+
     async def check_prompt_permission(
         self,
         user_id: str,
@@ -120,12 +121,12 @@ class AegisClient:
     ) -> bool:
         """
         Check permission for prompt operations.
-        
+
         Args:
             user_id: User identifier.
             action: Action to perform.
             prompt_id: Optional prompt ID for resource-specific checks.
-            
+
         Returns:
             bool: True if permitted.
         """
@@ -135,7 +136,7 @@ class AegisClient:
             action=action,
             resource_id=prompt_id,
         )
-    
+
     async def check_version_permission(
         self,
         user_id: str,
@@ -145,13 +146,13 @@ class AegisClient:
     ) -> bool:
         """
         Check permission for version operations.
-        
+
         Args:
             user_id: User identifier.
             action: Action to perform.
             prompt_id: Prompt ID.
             version: Optional version number.
-            
+
         Returns:
             bool: True if permitted.
         """
@@ -162,7 +163,7 @@ class AegisClient:
             action=action,
             resource_id=resource_id,
         )
-    
+
     async def log_action(
         self,
         user_id: str,
@@ -173,23 +174,23 @@ class AegisClient:
     ) -> bool:
         """
         Log an action to Aegis for audit purposes.
-        
+
         Args:
             user_id: User who performed the action.
             action: Action performed.
             resource_type: Type of resource.
             resource_id: Resource identifier.
             details: Additional details.
-            
+
         Returns:
             bool: True if logged successfully.
         """
         if not self.base_url:
             return True
-        
+
         try:
             client = await self._get_client()
-            
+
             payload = {
                 "user_id": user_id,
                 "action": action,
@@ -197,14 +198,14 @@ class AegisClient:
                 "resource_id": resource_id,
                 "details": details or {},
             }
-            
+
             response = await client.post(
                 f"{self.base_url}/api/v1/audit/log",
                 json=payload,
             )
-            
+
             return response.status_code == 200
-            
+
         except Exception as e:
             logger.error(f"Aegis audit log error: {e}")
             return False

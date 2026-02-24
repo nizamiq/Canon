@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from canon.core.aegis import AegisClient, get_aegis_client
 from canon.core.auth import CurrentUser, get_current_user, require_roles
 from canon.core.database import get_db_session
-from canon.core.aegis import get_aegis_client, AegisClient
 from canon.models.prompt import Prompt, PromptVersion, VersionTag
 from canon.services.audit import AuditService
 from canon.services.prompt import PromptService
