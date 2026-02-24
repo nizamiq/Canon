@@ -63,26 +63,33 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
 
-  build:
-    name: Build
+  docker:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v3
         with:
-          python-version: '3.12'
-      
-      - name: Install build tools
-        run: pip install build
-      
-      - name: Build package
-        run: python -m build
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          name: dist
-          path: dist/
+          images: ghcr.io/${{ github.repository }}
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/${{ github.repository }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
