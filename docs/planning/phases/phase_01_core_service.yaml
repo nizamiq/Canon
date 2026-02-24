@@ -1,7 +1,8 @@
 id: phase_01_core_service
 title: "Phase 01: Core Service Implementation"
 description: "Build the core Canon FastAPI service with database models, migrations, and RESTful API endpoints."
-status: IN_PROGRESS
+status: COMPLETE
+completed_at: "2026-02-24"
 dependencies:
   - phase_00_init
 
@@ -26,45 +27,57 @@ tasks:
     title: "Create Alembic migrations"
     description: "Initialize Alembic and create initial migration for all database tables."
     verification: "alembic upgrade head creates all tables in PostgreSQL."
-    status: IN_PROGRESS
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "alembic/env.py with async support, alembic/versions/001_initial.py with all tables"
 
   - id: T01.4
     title: "Implement JWT authentication middleware"
     description: "Add Zitadel JWT validation middleware for all API endpoints."
     verification: "Unauthenticated requests return 401, valid JWTs are accepted."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "src/canon/core/auth.py with verify_jwt, get_current_user, require_roles"
 
   - id: T01.5
     title: "Implement prompt CRUD endpoints"
     description: "Create RESTful endpoints: GET /v1/prompts, POST /v1/prompts, GET /v1/prompts/{name}."
     verification: "All endpoints work with proper request/response schemas."
     status: COMPLETE
-    completed_at: "2026-02-23"
-    proof_of_work: "src/canon/api/v1/endpoints/prompts.py with list, create, get, get_version"
+    completed_at: "2026-02-24"
+    proof_of_work: "src/canon/api/v1/endpoints/prompts.py with full CRUD using PromptService"
 
   - id: T01.6
     title: "Implement versioning logic"
     description: "Add version creation and immutable storage logic for prompts."
     verification: "Creating a prompt version stores immutable content snapshot."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "PromptService.create_version with immutable storage, auto-increment"
 
   - id: T01.7
     title: "Implement tagging system"
     description: "Add mutable tag management (production, staging, etc.) for prompt versions."
     verification: "Tags can be created, moved, and listed."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "GET/PUT/DELETE /{name}/tags/{tag}, GET /{name}/tag/{tag} for consumer lookup"
 
   - id: T01.8
     title: "Implement audit logging"
     description: "Add comprehensive audit logging for all governance-relevant actions."
     verification: "All create, update, and approval actions are logged."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "src/canon/services/audit.py with AuditService, log_prompt_create, log_version_create, log_tag_update"
 
   - id: T01.9
     title: "Add Aegis SDK integration"
     description: "Integrate Aegis SDK for RBAC enforcement on prompt operations."
     verification: "RBAC permissions checked for create, edit, approve actions."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "src/canon/core/aegis.py with AegisClient, check_permission, check_prompt_permission"
 
   - id: T01.10
     title: "Create OpenAPI specification"
@@ -78,7 +91,9 @@ tasks:
     title: "Write unit tests"
     description: "Create comprehensive unit tests for all service components."
     verification: "pytest passes with >80% coverage."
-    status: PENDING
+    status: COMPLETE
+    completed_at: "2026-02-24"
+    proof_of_work: "tests/test_api.py, tests/test_services.py, tests/test_auth.py, tests/conftest.py"
 
   - id: T01.12
     title: "Create Docker configuration"
@@ -92,8 +107,13 @@ completion_criteria:
   - criterion: "FastAPI service runs and responds to health checks."
     status: COMPLETE
   - criterion: "All database tables created via Alembic migrations."
-    status: PENDING
+    status: COMPLETE
   - criterion: "All API endpoints functional with JWT auth."
-    status: PENDING
+    status: COMPLETE
   - criterion: "Unit tests pass with >80% coverage."
-    status: PENDING
+    status: COMPLETE
+
+observations:
+  - "All tasks completed successfully. Service is ready for Phase 02 SDK development."
+  - "Database integration uses async SQLAlchemy with proper session management."
+  - "Authentication supports both Zitadel JWT and development mode fallback."
