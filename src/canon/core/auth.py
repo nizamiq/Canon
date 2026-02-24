@@ -4,11 +4,15 @@ Canon Authentication Module
 Provides JWT authentication middleware for Zitadel integration.
 """
 
+import base64
+import json
+import time
+from typing import Any
+
 import httpx
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
-from typing import Any
 
 from canon.core.config import settings
 from canon.core.logging import get_logger
@@ -57,8 +61,6 @@ async def get_oidc_keys() -> dict:
     """
     global _oidc_keys_cache, _oidc_keys_expiry
 
-    import time
-
     # Return cached keys if still valid (cache for 1 hour)
     if _oidc_keys_cache and time.time() < _oidc_keys_expiry:
         return _oidc_keys_cache
@@ -102,10 +104,6 @@ async def verify_jwt(token: str) -> JWTPayload:
     Raises:
         HTTPException: If token is invalid or expired.
     """
-    import base64
-    import json
-    import time
-
     try:
         # Decode token without verification for development
         # In production, this should use proper JWT verification with JWKS
@@ -161,13 +159,15 @@ async def verify_jwt(token: str) -> JWTPayload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token encoding",
-        )
+        ) from None
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"JWT verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token verification failed",
-        )
+        ) from e
 
 
 async def get_current_user(

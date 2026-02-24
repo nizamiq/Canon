@@ -35,7 +35,7 @@ async_session_factory = async_sessionmaker(
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency that provides a database session.
-    
+
     Yields:
         AsyncSession: Database session for the request.
     """

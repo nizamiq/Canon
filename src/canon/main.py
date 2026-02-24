@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan context manager for startup/shutdown events."""
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    
+
     # Initialize database connection pool
     try:
         await init_db()
@@ -31,9 +31,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
         raise
-    
+
     yield
-    
+
     # Cleanup
     logger.info(f"Shutting down {settings.app_name}")
     await close_db()
@@ -59,7 +59,7 @@ def create_app() -> FastAPI:
         "https://*.nizamiq.com",
         "https://portal.nizamiq.com",
     ]
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,

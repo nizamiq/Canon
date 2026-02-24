@@ -11,8 +11,8 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from canon.models.prompt import AuditLog
 from canon.core.logging import get_logger
+from canon.models.prompt import AuditLog
 
 logger = get_logger(__name__)
 
@@ -20,11 +20,11 @@ logger = get_logger(__name__)
 class AuditService:
     """
     Service for recording audit log entries.
-    
+
     All governance-relevant actions are logged immutably for
     compliance and debugging purposes.
     """
-    
+
     # Audit action types
     ACTION_CREATE = "CREATE"
     ACTION_UPDATE = "UPDATE"
@@ -34,21 +34,21 @@ class AuditService:
     ACTION_TAG = "TAG"
     ACTION_PUBLISH = "PUBLISH"
     ACTION_ROLLBACK = "ROLLBACK"
-    
+
     # Resource types
     RESOURCE_PROMPT = "PROMPT"
     RESOURCE_VERSION = "VERSION"
     RESOURCE_TAG = "TAG"
-    
+
     def __init__(self, db: AsyncSession):
         """
         Initialize audit service.
-        
+
         Args:
             db: Database session.
         """
         self.db = db
-    
+
     async def log(
         self,
         action: str,
@@ -59,14 +59,14 @@ class AuditService:
     ) -> AuditLog:
         """
         Create an audit log entry.
-        
+
         Args:
             action: Action type (CREATE, UPDATE, etc.).
             resource_type: Resource type (PROMPT, VERSION, etc.).
             resource_id: Resource identifier.
             actor: User ID of the actor.
             details: Optional additional details.
-            
+
         Returns:
             AuditLog: Created audit log entry.
         """
@@ -79,16 +79,16 @@ class AuditService:
             details=json.dumps(details) if details else None,
             created_at=datetime.utcnow(),
         )
-        
+
         self.db.add(log_entry)
         await self.db.flush()
-        
+
         logger.info(
             f"Audit log created: {action} {resource_type}:{resource_id} by {actor}"
         )
-        
+
         return log_entry
-    
+
     async def log_prompt_create(
         self,
         prompt_id: str,
@@ -107,7 +107,7 @@ class AuditService:
                 "initial_content_length": len(initial_content) if initial_content else 0,
             },
         )
-    
+
     async def log_version_create(
         self,
         prompt_id: str,
@@ -127,7 +127,7 @@ class AuditService:
                 "content_length": content_length,
             },
         )
-    
+
     async def log_tag_update(
         self,
         prompt_id: str,
@@ -149,7 +149,7 @@ class AuditService:
                 "new_version": new_version,
             },
         )
-    
+
     async def log_prompt_publish(
         self,
         prompt_id: str,
@@ -166,7 +166,7 @@ class AuditService:
                 "published_version": version,
             },
         )
-    
+
     async def get_resource_history(
         self,
         resource_type: str,
@@ -175,12 +175,12 @@ class AuditService:
     ) -> list[AuditLog]:
         """
         Get audit history for a resource.
-        
+
         Args:
             resource_type: Resource type.
             resource_id: Resource identifier.
             limit: Maximum number of entries.
-            
+
         Returns:
             List of audit log entries.
         """
@@ -191,6 +191,6 @@ class AuditService:
             .order_by(AuditLog.created_at.desc())
             .limit(limit)
         )
-        
+
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
