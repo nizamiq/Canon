@@ -11,9 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from canon import __version__
 from canon.api.v1 import api_router
-from canon.core.config import settings
-from canon.core.database import init_db, close_db
 from canon.core.aegis import close_aegis_client
+from canon.core.config import settings
+from canon.core.database import close_db, init_db
 from canon.core.logging import get_logger
 
 logger = get_logger(__name__)

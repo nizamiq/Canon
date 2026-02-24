@@ -6,16 +6,15 @@ Business logic for prompt management with database integration.
 
 import uuid
 from datetime import datetime
-from typing import Any
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from canon.models.prompt import Prompt, PromptVersion, VersionTag
-from canon.services.audit import AuditService
 from canon.core.aegis import AegisClient
 from canon.core.logging import get_logger
+from canon.models.prompt import Prompt, PromptVersion, VersionTag
+from canon.services.audit import AuditService
 
 logger = get_logger(__name__)
 
