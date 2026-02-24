@@ -1,7 +1,8 @@
 """Canon Python SDK Client."""
 
+from typing import Any
+
 import httpx
-from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 
@@ -14,14 +15,14 @@ class PromptVersion(BaseModel):
 
 class PromptResponse(BaseModel):
     name: str
-    description: Optional[str]
+    description: str | None
     current_version: int
-    tags: List[str]
-    versions: List[PromptVersion]
+    tags: list[str]
+    versions: list[PromptVersion]
 
 
 class PromptListResponse(BaseModel):
-    prompts: List[PromptResponse]
+    prompts: list[PromptResponse]
     total: int
     page: int
     page_size: int
@@ -41,7 +42,9 @@ class CanonClient:
             response.raise_for_status()
             return PromptResponse(**response.json())
 
-    def list_prompts(self, page: int = 1, page_size: int = 20, tag: Optional[str] = None) -> PromptListResponse:
+    def list_prompts(
+        self, page: int = 1, page_size: int = 20, tag: str | None = None
+    ) -> PromptListResponse:
         """List all prompts."""
         params: dict[str, Any] = {"page": page, "page_size": page_size}
         if tag:
@@ -54,19 +57,25 @@ class CanonClient:
     def get_prompt_version(self, name: str, version: int) -> PromptVersion:
         """Fetch a specific version of a prompt."""
         with httpx.Client(timeout=self.timeout) as client:
-            response = client.get(f"{self.base_url}/v1/prompts/{name}/versions/{version}")
+            response = client.get(
+                f"{self.base_url}/v1/prompts/{name}/versions/{version}"
+            )
             response.raise_for_status()
             return PromptVersion(**response.json())
 
     def create_prompt(
-        self, name: str, content: str, description: Optional[str] = None, tags: Optional[List[str]] = None
+        self,
+        name: str,
+        content: str,
+        description: str | None = None,
+        tags: list[str] | None = None,
     ) -> PromptResponse:
         """Create a new prompt."""
         payload = {
             "name": name,
             "content": content,
             "description": description,
-            "tags": tags or []
+            "tags": tags or [],
         }
         with httpx.Client(timeout=self.timeout) as client:
             response = client.post(f"{self.base_url}/v1/prompts", json=payload)
