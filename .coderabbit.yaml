@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# NizamIQ Ecosystem Standard — CodeRabbit Configuration
+# Profile: balanced | Gating: enabled
+language: "en-US"
+early_access: false
+reviews:
+  profile: "balanced"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  review_details: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!**/*.lock"
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+chat:
+  auto_reply: true
