@@ -13,6 +13,10 @@ version: "1.0.0"
 
 ## Purpose
 
+Architectural Archetype: **Governance Layer**
+Architectural Archetype: **Governance Layer**
+
+
 AI prompt registry — provides a centralized, versioned registry for all AI prompts used across the ecosystem, enabling governance, A/B testing, and reusability.
 
 ## In Scope
