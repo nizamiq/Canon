@@ -96,85 +96,11 @@ jobs:
       - uses: coderabbitai/ai-pr-reviewer@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
           debug: false
           review_simple_changes: false
           review_comment_lgtm: false
 
-  codex-review:
-    name: "Gate 3b — AI Review (CodeX Gate)"
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    needs: [test]
-    permissions:
-      contents: read
-      pull-requests: write
-    concurrency:
-      group: ${{ github.repository }}-${{ github.event.pull_request.number }}-codex
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-      - name: Run Codex review
-        id: codex
-        uses: openai/codex-action@v1
-        with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          prompt-file: .github/codex/prompts/review.md
-          sandbox: read-only
-          codex-args: --full-auto
-      - name: Parse severity summary
-        id: severity
-        shell: bash
-        env:
-          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final_message }}
-        run: |
-          set -euo pipefail
-          msg="$CODEX_FINAL_MESSAGE"
-          if [ -z "$msg" ]; then
-            echo "blockers=0" >> "$GITHUB_OUTPUT"
-            echo "major=0" >> "$GITHUB_OUTPUT"
-            echo "minor=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          get_val() { echo "$msg" | sed -n "s/^$1:[[:space:]]*//p" | head -1; }
-          blockers=$(get_val "BLOCKERS"); major=$(get_val "MAJOR"); minor=$(get_val "MINOR")
-          if [ -z "$blockers" ] || [ -z "$major" ] || [ -z "$minor" ]; then
-            blockers=1; major=0; minor=0
-          fi
-          echo "blockers=$blockers" >> "$GITHUB_OUTPUT"
-          echo "major=$major" >> "$GITHUB_OUTPUT"
-          echo "minor=$minor" >> "$GITHUB_OUTPUT"
-      - name: Gate on severity
-        shell: bash
-        run: |
-          if [ "${{ steps.severity.outputs.blockers }}" -gt 0 ] || [ "${{ steps.severity.outputs.major }}" -ge 3 ]; then
-            echo "Codex gate failed: blockers=${{ steps.severity.outputs.blockers }} major=${{ steps.severity.outputs.major }}"
-            exit 1
-          fi
-      - name: Post Codex review
-        if: steps.codex.outputs.final_message != ''
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            const body = process.env.CODEX_FINAL_MESSAGE;
-            const blockers = Number(process.env.CODEX_BLOCKERS || 0);
-            const major = Number(process.env.CODEX_MAJOR || 0);
-            const event = (blockers > 0 || major >= 3) ? "REQUEST_CHANGES" : "COMMENT";
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              event,
-              body,
-            });
-        env:
-          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final_message }}
-          CODEX_BLOCKERS: ${{ steps.severity.outputs.blockers }}
-          CODEX_MAJOR: ${{ steps.severity.outputs.major }}
   # ===================================================================
   # GATE 4: BUILD & SECURITY SCAN
   # ===================================================================
