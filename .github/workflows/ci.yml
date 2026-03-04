@@ -11,6 +11,11 @@ permissions:
   pull-requests: write
 
 jobs:
+  doc_lint:
+    name: UDS Documentation Lint
+    uses: nizamiq/documentation-standard/.github/workflows/doc-lint.yml@main
+    secrets: inherit
+
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
