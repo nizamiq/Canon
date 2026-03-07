@@ -3,7 +3,7 @@ id: canon-debt
 title: "Canon: Technical Debt & Gap Register"
 description: "Technical debt and gap register, seeded from the February 2026 ecosystem audit."
 tags: ["canon", "debt", "audit"]
-status: ACTIVE
+status: STABLE
 last_audited: "2026-02-24"
 authoritative_source: DEBT.md
 version: "1.0.0"
