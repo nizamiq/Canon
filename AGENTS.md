@@ -9,6 +9,19 @@ authoritative_source: AGENTS.md
 version: 1.0.0
 ---
 
+## Quick-Start Checklist
+
+Before taking any action in this repository, complete the following steps in order:
+
+1. **Verify scope** — Confirm this repo is listed as `in-scope` in [SCOPE.md](https://github.com/nizamiq/nizamiq-strategy/blob/main/SCOPE.md) and [ECOSYSTEM.json](https://github.com/nizamiq/nizamiq-strategy/blob/main/ECOSYSTEM.json).
+2. **Read CONTEXT.md** — Understand the system architecture, dependency map, execution commands, and explicit out-of-scope boundaries before writing any code.
+3. **Check the manifest** — Open `docs/planning/manifest.json`. Identify the current phase and read the active phase YAML before proposing any work.
+4. **Review DEBT.md** — Open `docs/planning/DEBT.md` (if present). Do not introduce changes that conflict with known debt or workarounds.
+5. **Branch correctly** — Create a branch: `phase/<id>-<description>`, `fix/<description>`, or `chore/<description>`. Never commit directly to `main`.
+6. **Open a PR** — When the phase or task is complete, open a Pull Request against `main`. Do not self-merge.
+7. **Resolve CodeRabbit** — All CodeRabbit findings must be resolved before the PR is eligible for merge.
+
+
 # Canon: AI Agent Guidelines
 
 ---

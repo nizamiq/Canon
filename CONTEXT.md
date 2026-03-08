@@ -98,3 +98,12 @@ See [manifest.json](./docs/planning/manifest.json) for phase tracking.
 ## 9. ADR Reference
 
 This project is defined by [ADR-004: Centralized AI Agent Prompt Registry](https://github.com/nizamiq/nizamiq-strategy/blob/main/docs/architecture/ADR_004_Prompt_Registry.md)
+
+## Out of Scope
+
+The following are explicit boundaries for this repository. Agents must not implement, refactor, or propose work in these areas without explicit operator authorisation:
+
+- No prompt execution — prompt registry only; does not run prompts
+- No application source code — prompt definitions and manifests only
+- No AI inference — Canon stores, does not execute
+- No user-facing UI — all presentation is Meridian or Arnold's responsibility
