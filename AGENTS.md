@@ -91,3 +91,19 @@ This project uses the NizamIQ Planning Framework:
 | Version | Date | Author | Changes |
 | :--- | :--- | :--- | :--- |
 | 1.0.0 | 2026-02-23 | Orchestrator Agent | Initial creation |
+
+---
+
+## ⚠️ Git Workflow — PR Mandate
+
+- **Agents MUST open a Pull Request against `main` for every completed phase.** Direct pushes to `main` are not permitted.
+- Branch naming: `phase/<phase-id>-<short-description>`, `fix/<short-description>`, or `chore/<short-description>`.
+- The PR description must reference the completed phase YAML and summarise what was delivered.
+- Do not merge your own PR — leave it open for human operator review and approval.
+
+## ⚠️ Code Review Gate — CodeRabbit
+
+- All CodeRabbit review findings **must be resolved** before a PR is eligible for merge.
+- CodeRabbit is configured with `request_changes_workflow: true` — unresolved findings block merge via GitHub's Request Changes mechanism.
+- All PR conversations must be marked resolved (`required_conversation_resolution` is enforced on `main` in branch protection).
+- Do not dismiss or bypass CodeRabbit reviews without addressing the underlying finding.
