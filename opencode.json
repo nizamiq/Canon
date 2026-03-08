@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Pull the canonical NizamIQ governance documents into every session's context.
+  // These are loaded in addition to the project's AGENTS.md file.
+  // Remote instructions are fetched with a 5-second timeout on session start.
+  "instructions": [
+    // AGIP bootstrap: defines the agent governance and integration protocol
+    "https://raw.githubusercontent.com/nizamiq/documentation-standard/main/standard/AGIP.md",
+    // Methodology entry point: onboarding sequence and manifest navigation
+    "https://raw.githubusercontent.com/nizamiq/nizamiq-methodology/main/CONTEXT.md",
+    // UDS: documentation standard all agents must adhere to
+    "https://raw.githubusercontent.com/nizamiq/documentation-standard/main/standard/UDS.md",
+    // Code generation standards: coding rules for the execution-engine agent
+    "https://raw.githubusercontent.com/nizamiq/nizamiq-methodology/main/standards/01_code_generation_standards.md"
+  ],
+
+  // Set the Orchestrator as the default primary agent.
+  // Developers can switch to other primary agents using the Tab key.
+  "agent": {
+    "default": "orchestrator"
+  }
+}
